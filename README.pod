@@ -18,6 +18,19 @@ Perl library to access OpenNebula RPC interface.
  );
     
  my @vms = $one->get_vms();
+ my $vm  = $one->create_vm(
+    name     => "the-name",
+    template => $template_id
+ );
+    
+ my $state = $vm->state;
+ while($state ne "running") {
+    sleep 5; # wait 5 seconds for the next request
+    $state = $vm->state;
+ }
+    
+ my @nics = $vm->nics;
+ my $ip = $nics[0]->ip; # get the ip of the first device
 
 =cut
 
