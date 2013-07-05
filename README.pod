@@ -1,0 +1,24 @@
+=pod
+
+=head1 NAME
+
+Net::OpenNebula - Access OpenNebula RPC interface
+
+=head1 DESCRIPTION
+
+Perl library to access OpenNebula RPC interface.
+
+=head1 SYNOPSIS
+
+ use Net::OpenNebula;
+ my $one = Net::OpenNebula->new(
+    url      => "http://server:2633/RPC2",
+    user     => "oneadmin",
+    password => "onepass",
+ );
+    
+ my @vms = $one->get_vms();
+
+=cut
+
+
