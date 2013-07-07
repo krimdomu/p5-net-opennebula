@@ -4,8 +4,28 @@
 # vim: set ts=3 sw=3 tw=0:
 # vim: set expandtab:
 #
-# !no_doc!
-   
+
+=head1 NAME
+
+Net::OpenNebula::Host - Access OpenNebula Host Information.
+
+=head1 DESCRIPTION
+
+Query the Hoststatus of an OpenNebula host.
+
+=head1 SYNOPSIS
+
+ use Net::OpenNebula;
+ my $one = Net::OpenNebula->new(
+    url      => "http://server:2633/RPC2",
+    user     => "oneadmin",
+    password => "onepass",
+ );
+    
+ my ($host) = grep { $_->name eq "one-sandbox" } $one->get_hosts();
+ for my $vm ($host->vms) { ... }
+
+=cut
 
 package Net::OpenNebula::Host;
 
@@ -42,6 +62,18 @@ sub _get_info {
    if(! exists $self->{extended_data}) {
       $self->{extended_data} = $self->{rpc}->_rpc("one.host.info", [ int => $self->id ]);
    }
+}
+
+sub vms {
+   my ($self) = @_;
+   $self->_get_info();
+
+   my @ret;
+   for my $vm_id (@{ $self->{extended_data}->{VMS} }) {
+      push @ret, $self->{rpc}->get_vm($vm_id->{ID}->[0]);
+   }
+
+   return @ret;
 }
 
 1;
