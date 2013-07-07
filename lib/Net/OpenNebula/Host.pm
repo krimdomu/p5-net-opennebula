@@ -69,8 +69,8 @@ sub vms {
    $self->_get_info();
 
    my @ret;
-   for my $vm_id (@{ $self->{extended_data}->{VMS} }) {
-      push @ret, $self->{rpc}->get_vm($vm_id->{ID}->[0]);
+   for my $vm_id (@{ $self->{extended_data}->{VMS}->[0]->{ID} }) {
+      push @ret, $self->{rpc}->get_vm($vm_id);
    }
 
    return @ret;
