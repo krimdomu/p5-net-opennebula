@@ -50,4 +50,10 @@ sub _get_info {
    }
 }
 
+sub get_data {
+   my ($self) = @_;
+   $self->_get_info;
+   return $self->{extended_data};
+}
+
 1;
