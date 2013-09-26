@@ -13,9 +13,13 @@ Net::OpenNebula - Access OpenNebula RPC via Perl.
 
 With this module you can access the OpenNebula XML-RPC service.
 
+To inspect the return values of the methods we suggest to use Data::Dumper.
+
 =head1 SYNOPSIS
 
  use Net::OpenNebula;
+ use Data::Dumper; # for the Dumper() function.
+    
  my $one = Net::OpenNebula->new(
     url      => "http://server:2633/RPC2",
     user     => "oneadmin",
@@ -23,6 +27,13 @@ With this module you can access the OpenNebula XML-RPC service.
  );
     
  my @vms = $one->get_vms();
+     
+ print Dumper(@vms);
+
+
+=head1 METHODS
+
+=over 4
 
 =cut
 
@@ -44,6 +55,19 @@ use Net::OpenNebula::Template;
 
 our $VERSION = "0.0.1";
 
+=item new(%option)
+
+This is the constructor.
+
+ my $one = Net::OpenNebula->new(
+    url      => "http://server:2633/RPC2",
+    user     => "oneadmin",
+    password => "onepass",
+ );
+ 
+
+=cut
+
 sub new {
    my $that = shift;
    my $proto = ref($that) || $that;
@@ -54,6 +78,13 @@ sub new {
    return $self;
 }
 
+=item get_clusters()
+
+This function calls I<one.clusterpool.info>. This will return information of all clusters in the pool.
+
+ my @clusters = $one->get_clusters;
+
+=cut
 sub get_clusters {
    my ($self) = @_;
 
@@ -68,6 +99,13 @@ sub get_clusters {
    return @ret;
 }
 
+=item get_hosts()
+
+This function calls I<one.hostpool.info>. This will return information of all hosts in the pool.
+
+ my @hosts = $one->get_hosts;
+
+=cut
 sub get_hosts {
    my ($self) = @_;
 
@@ -82,6 +120,13 @@ sub get_hosts {
    return @ret;
 }
 
+=item get_host($id)
+
+This function calls I<one.host.info>. This will return information the given host. You need to refer to the host by its OpenNebula id.
+
+ my $host = $one->get_host(5);
+
+=cut
 sub get_host {
    my ($self, $id) = @_;
 
@@ -93,6 +138,13 @@ sub get_host {
    return Net::OpenNebula::Host->new(rpc => $self, data => $data, extended_data => $data);
 }
 
+=item get_vms()
+
+This function calls I<one.vmpool.info>. This will return information of all known virtual machines.
+
+ my @vms = $one->get_vms;
+
+=cut
 sub get_vms {
    my ($self) = @_;
 
@@ -112,6 +164,17 @@ sub get_vms {
    return @ret;
 }
 
+=item get_vm()
+
+This function calls I<one.vm.info>. This will return information of the given virtual machine.
+
+ my $vm = $one->get_vm(8);
+
+You can also use the virtual machine's name.
+
+ my $vm = $one->get_vm('myvm');
+
+=cut
 sub get_vm {
    my ($self, $id) = @_;
 
@@ -132,6 +195,13 @@ sub get_vm {
 
 }
 
+=item get_templates()
+
+This function calls I<one.templatepool.info>. This will return information of all the templates available in OpenNebula.
+
+ my @templates = $one->get_templates;
+
+=cut
 sub get_templates {
    my ($self) = @_;
 
@@ -150,6 +220,23 @@ sub get_templates {
    return @ret;
 }
 
+=item create_vm(%option)
+
+This function will call I<one.vm.allocate> and create a new virtual machine.
+
+ my $vm = $one->create_vm(
+    template => 7,
+    name     => 'vmname',
+ );
+
+You can also use the template name.
+
+ my $vm = $one->create_vm(
+    template => 'centos',
+    name     => 'vmname',
+ );
+
+=cut
 sub create_vm {
    my ($self, %option) = @_;
 
@@ -172,6 +259,21 @@ sub create_vm {
    return $self->get_vm($res);
 }
 
+=item create_host(%option)
+
+This function will call I<one.host.allocate> and register a new host into OpenNebula.
+
+ my $host = $one->create_host(
+    name    => 'my-computenode',
+    im_mad  => 'im_mad_name',  # optional
+    vmm_mad => 'vmm_mad_name', # optional
+    vnm_mad => 'vnm_mad_name', # optional
+    cluster => 'my-computenode',
+ );
+
+The I<cluster> option is optional. All other options are mandatory.
+
+=cut
 sub create_host {
    my ($self, %option) = @_;
 
@@ -216,5 +318,9 @@ sub _rpc {
    }   
 
 }
+
+=back
+
+=cut
 
 1;
