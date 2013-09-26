@@ -1,0 +1,10 @@
+ChangeLog
+lib/Net/OpenNebula.pm
+lib/Net/OpenNebula/Cluster.pm
+lib/Net/OpenNebula/Host.pm
+lib/Net/OpenNebula/Template.pm
+lib/Net/OpenNebula/VM.pm
+lib/Net/OpenNebula/VM/NIC.pm
+Makefile.PL
+MANIFEST			This list of files
+t/base.t
