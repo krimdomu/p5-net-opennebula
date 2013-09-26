@@ -53,7 +53,7 @@ use Net::OpenNebula::Cluster;
 use Net::OpenNebula::VM;
 use Net::OpenNebula::Template;
 
-our $VERSION = "0.0.1";
+our $VERSION = "0.1";
 
 =item new(%option)
 
