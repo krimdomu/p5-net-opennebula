@@ -146,6 +146,14 @@ sub delete {
                      );
 }
 
+sub delete_recreate {
+   my ($self) = @_;
+   $self->{rpc}->_rpc("one.vm.action",
+                        [ string => "delete-recreate" ],
+                        [ int => $self->id ],
+                     );
+}
+
 sub shutdown_hard {
    my ($self) = @_;
    $self->{rpc}->_rpc("one.vm.action",
