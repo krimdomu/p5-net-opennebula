@@ -32,36 +32,16 @@ package Net::OpenNebula::Host;
 use strict;
 use warnings;
 
-use Data::Dumper;
+use Net::OpenNebula::RPC;
+push our @ISA , qw(Net::OpenNebula::RPC);
 
-sub new {
-   my $that = shift;
-   my $proto = ref($that) || $that;
-   my $self = { @_ };
-
-   bless($self, $proto);
-
-   return $self;
-}
-
-sub id {
-   my ($self) = @_;
-   return $self->{data}->{ID}->[0];
-}
+use constant ONERPC => 'host';
 
 sub name {
    my ($self) = @_;
    $self->_get_info();
 
    return $self->{extended_data}->{NAME}->[0];
-}
-
-sub _get_info {
-   my ($self) = @_;
-
-   if(! exists $self->{extended_data}) {
-      $self->{extended_data} = $self->{rpc}->_rpc("one.host.info", [ int => $self->id ]);
-   }
 }
 
 sub vms {
