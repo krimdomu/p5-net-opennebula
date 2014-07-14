@@ -206,6 +206,17 @@ sub create_host {
    return $self->get_host($data->[1]);
 }
 
+
+sub create_template {
+   my ($self, $txt) = @_;
+
+   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $one, data => undef);
+   $new_tmpl->create($txt);
+   
+   return $new_tmpl;
+}
+
+
 sub _rpc {
    my ($self, $meth, @params) = @_;                                                                                
 
