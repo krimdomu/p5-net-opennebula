@@ -15,6 +15,7 @@ use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'template';
+use constant ONEPOOLKEY => 'VMTEMPLATE';
 
 sub name {
    my ($self) = @_;
