@@ -34,8 +34,9 @@ sub id {
 sub name {
    my ($self) = @_;
    $self->_get_info();
-
-   return $self->{extended_data}->{TEMPLATE}->[0]->{NAME}->[0];
+   
+   # if vm NAME is set, use that instead of template NAME
+   return $self->{data}->{NAME}->[0] || $self->{extended_data}->{TEMPLATE}->[0]->{NAME}->[0];
 }
 
 sub nics {
