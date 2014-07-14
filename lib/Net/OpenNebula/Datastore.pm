@@ -16,5 +16,13 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'datastore';
 
+sub name {
+   my ($self) = @_;
+   $self->_get_info();
+   
+   # if datastore NAME is set, use that instead of template NAME
+   return $self->{data}->{NAME}->[0] || $self->{extended_data}->{TEMPLATE}->[0]->{NAME}->[0];
+}
+
 
 1;
