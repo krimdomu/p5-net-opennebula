@@ -21,7 +21,7 @@ sub name {
    $self->_get_info();
    
    # if datastore NAME is set, use that instead of template NAME
-   return $self->{data}->{NAME}->[0] || $self->{extended_data}->{TEMPLATE}->[0]->{NAME}->[0];
+   return $self->{data}->{NAME}->[0] || $self->{data}->{TEMPLATE}->[0]->{NAME}->[0];
 }
 
 
