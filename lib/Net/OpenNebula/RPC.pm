@@ -43,8 +43,11 @@ sub _onerpc_simple {
 sub _get_info {
    my ($self, %option) = @_;
 
+   my $id = $self->id;
+   $id = $option{id} if (exists $option{id});  
+
    if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
-      $self->{extended_data} = $self->_onerpc_id("info");
+      $self->{extended_data} = $self->_onerpc("info", [ int => $id ]);
    }
 }
 
