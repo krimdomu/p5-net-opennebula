@@ -210,7 +210,7 @@ sub create_host {
 sub create_template {
    my ($self, $txt) = @_;
 
-   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $one, data => undef);
+   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
    $new_tmpl->create($txt);
    
    return $new_tmpl;
