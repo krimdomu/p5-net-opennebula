@@ -49,7 +49,7 @@ sub start {
       return $self->resume();
    }
    else {
-      return $self->_onerpcsimple("action", "start");
+      return $self->_onerpc_simple("action", "start");
    }
 }
 
@@ -109,7 +109,7 @@ foreach my $i (qw(shutdown shutdown_hard reboot reboot_hard poweroff poweroff_ha
                   boot resched unresched undeploy undeploy_hard)) {
     *{$i} = sub {
         my $self = shift;
-        return $self->_onerpcsimple("action", $i);
+        return $self->_onerpc_simple("action", $i);
     }
 }
 use strict 'refs';
