@@ -12,19 +12,13 @@ package Net::OpenNebula::VM;
 use strict;
 use warnings;
 
+use Net::Opennebula::RPC;
+
+@ISA = ("Net::Opennebula::RPC");
+
 use Net::OpenNebula::VM::NIC;
 
 use Data::Dumper;
-
-sub new {
-   my $that = shift;
-   my $proto = ref($that) || $that;
-   my $self = { @_ };
-
-   bless($self, $proto);
-
-   return $self;
-}
 
 sub id {
    my ($self) = @_;
