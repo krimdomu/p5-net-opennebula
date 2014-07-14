@@ -17,6 +17,16 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'vm';
 
+# the VM states as constants
+use constant {
+    STOPPED => "stopped",
+    PENDING => "pending",
+    PROLOG => "prolog",
+    RUNNING => "running",
+    SHUTDOWN => "shutdown",
+    DONE => "done"
+}
+
 use Net::OpenNebula::VM::NIC;
 
 sub name {
@@ -58,32 +68,32 @@ sub state {
    my ($self) = @_;
    $self->_get_info(clearcache => 1);
 
-   if($self->{extended_data}->{STATE}->[0] == 4) {
-      return "stopped";
+   my $state = $self->{extended_data}->{STATE}->[0];  
+   if($state == 4) {
+      return STOPPED;
    }
 
-   if($self->{extended_data}->{STATE}->[0] == 1) {
-      return "pending";
+   if($state == 1) {
+      return PENDING;
    }
 
-   if($self->{extended_data}->{STATE}->[0] == 3 
-      && $self->{extended_data}->{LAST_POLL}->[0] == 0) {
-      return "prolog";
+   my $last_poll = $self->{extended_data}->{LAST_POLL}->[0];
+   if($state == 3 && $last_poll == 0) {
+      return PROLOG;
    }
 
-   if($self->{extended_data}->{STATE}->[0] == 3
-      && $self->{extended_data}->{LAST_POLL}->[0]
-      && $self->{extended_data}->{LAST_POLL}->[0] > 0) {
-      return "running";
+   if($state == 3 && $last_poll->[0] && $last_poll > 0) {
+      return RUNNING;
    }
 
-   if($self->{extended_data}->{LCM_STATE}->[0] == 12) {
-      return "shutdown";
+   my $lcm_state = $self->{extended_data}->{LCM_STATE}->[0];  
+   if($lcm_state == 12) {
+      return SHUTDOWN;
    }
 
-   if($self->{extended_data}->{LCM_STATE}->[0] == 0
-      && $self->{extended_data}->{LCM_STATE}->[0] == 6) {
-      return "done";
+   # TODO what is this supposed to mean? it's impossible or a typo 
+   if($lcm_state == 0 && $lcm_state == 6) {
+      return DONE;
    }
 
 
