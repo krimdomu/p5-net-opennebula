@@ -55,7 +55,8 @@ sub start {
    my ($self) = @_;
    $self->_get_info(clearcache => 1);
 
-   if($self->{extended_data}->{STATE}->[0] == 5 || $self->{extended_data}->{STATE}->[0] == 4 || $self->{extended_data}->{STATE}->[0] == 8) {
+   my $state = $self->{extended_data}->{STATE}->[0];  
+   if($state == 5 || $state == 4 || $state == 8) {
       return $self->resume();
    }
    else {
