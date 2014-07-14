@@ -40,7 +40,9 @@ sub get_data {
 
 sub create {
    my ($self, $tpl_txt) = @_;
-   return $self->_onerpc("allocate", [ string => $tpl_txt ]); 
+   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ]);
+   $self->{data} =  $self->_get_info(id => $id); 
+   return $id;
 }
 
 
