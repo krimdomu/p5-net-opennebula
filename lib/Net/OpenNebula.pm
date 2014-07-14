@@ -37,10 +37,11 @@ use RPC::XML::Client;
 
 use Data::Dumper;
 
-use Net::OpenNebula::Host;
 use Net::OpenNebula::Cluster;
-use Net::OpenNebula::VM;
+use Net::OpenNebula::Datastore;
+use Net::OpenNebula::Host;
 use Net::OpenNebula::Template;
+use Net::OpenNebula::VM;
 
 our $VERSION = "0.0.1";
 
@@ -55,10 +56,17 @@ sub new {
 }
 
 sub get_clusters {
-   my ($self) = @_;
+   my ($self, $nameregex) = @_;
 
    my $new = Net::OpenNebula::Cluster->new(rpc => $self);
-   return $new->_get_instances();
+   return $new->_get_instances($nameregex);
+}
+
+sub get_datastores {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::Datastore->new(rpc => $self);
+   return $new->_get_instances($nameregex);
 }
 
 sub get_hosts {
