@@ -19,13 +19,6 @@ use constant ONERPC => 'vm';
 
 use Net::OpenNebula::VM::NIC;
 
-use Data::Dumper;
-
-sub id {
-   my ($self) = @_;
-   return $self->{data}->{ID}->[0];
-}
-
 sub name {
    my ($self) = @_;
    $self->_get_info();
@@ -101,14 +94,6 @@ sub arch {
    $self->_get_info;
 
    return $self->{extended_data}->{TEMPLATE}->[0]->{OS}->[0]->{ARCH}->[0];
-}
-
-sub _get_info {
-   my ($self, %option) = @_;
-
-   if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
-      $self->{extended_data} = $self->_onerpc("info", [ int => $self->id ]);
-   }
 }
 
 sub get_data {
