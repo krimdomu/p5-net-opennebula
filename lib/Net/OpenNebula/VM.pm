@@ -25,7 +25,7 @@ use constant {
     RUNNING => "running",
     SHUTDOWN => "shutdown",
     DONE => "done"
-}
+};
 
 use Net::OpenNebula::VM::NIC;
 
