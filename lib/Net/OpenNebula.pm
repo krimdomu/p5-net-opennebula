@@ -90,7 +90,7 @@ sub get_host {
 sub get_vms {
    my ($self, $nameregex) = @_;
 
-   my $new = Net::OpenNebula::Host->new(rpc => $self);
+   my $new = Net::OpenNebula::VM->new(rpc => $self);
    return $new->_get_instances($nameregex,
                                [ int => -2 ], # always get all resources
                                [ int => -1 ], # range from (begin)
@@ -123,7 +123,7 @@ sub get_vm {
 sub get_templates {
    my ($self, $nameregex) = @_;
 
-   my $new = Net::OpenNebula::Host->new(rpc => $self);
+   my $new = Net::OpenNebula::Template->new(rpc => $self);
    return $new->_get_instances($nameregex,
                                [ int => -2 ], # all templates
                                [ int => -1 ], # range start
