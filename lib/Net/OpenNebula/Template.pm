@@ -51,4 +51,18 @@ sub delete {
     return $self->_onerpc_id("delete");
 }
 
+sub instantiate {
+    my ($self, %options) = @_;
+
+    my @args = ([ int => $self->id ]);
+
+    push(@args, [ string => $options{name} || "" ] );
+    push(@args, [ boolean => $options{onhold} || 0 ] );
+    push(@args, [ string => $options{extra} || "" ] );
+
+    my $vmid = $self->_onerpc("instantiate", @args);
+    
+    return $vmid;
+}
+
 1;
