@@ -193,10 +193,19 @@ sub create_template {
 
 
 sub create_image {
-   my ($self, $txt) = @_;
+   my ($self, $txt, $datastore) = @_;
+
+   my $datastoreid; 
+   if($datastore =~ m/^\d+$/) {
+      $datastoreid = $datastore;
+   }
+   else {
+      my @datastores = $self->get_datastores(qr{^$datastore$});
+      $datastoreid = $datastores[0]->id if (@datastores); # take the first one
+   }
 
    my $new_tmpl = Net::OpenNebula::Image->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt);
+   $new_tmpl->create($txt, $datastoreid);
    
    return $new_tmpl;
 }

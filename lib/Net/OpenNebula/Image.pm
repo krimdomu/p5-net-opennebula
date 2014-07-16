@@ -24,8 +24,8 @@ sub name {
 }
 
 sub create {
-   my ($self, $tpl_txt) = @_;
-   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ]);
+   my ($self, $tpl_txt, $datastoreid) = @_;
+   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ], [ int => $datastoreid ]);
    $self->{data} =  $self->_get_info(id => $id); 
    return $id;
 }
