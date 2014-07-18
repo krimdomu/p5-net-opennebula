@@ -16,6 +16,9 @@ push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'image';
 
+# from include/Image.h enum ImageState
+use constant STATES => qw(INIT READY USED DISABLED LOCKED ERROR CLONE DELETE USED_PERS);
+
 sub name {
    my ($self) = @_;
    $self->_get_info();
@@ -35,5 +38,15 @@ sub delete {
     my ($self) = @_;
     return $self->_onerpc_id("delete");
 }
+
+# Return the state as string
+sub state {
+   my ($self) = @_;
+   $self->_get_info(clearcache => 1);
+
+   my $state = $self->{extended_data}->{STATE}->[0];
+   return (STATES)[$state];    
+};
+
 
 1;
