@@ -43,6 +43,7 @@ use Net::OpenNebula::Host;
 use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
 use Net::OpenNebula::VM;
+use Net::OpenNebula::VNet;
 
 our $VERSION = "0.0.99.1";
 
@@ -132,6 +133,17 @@ sub get_templates {
                                );
 }
 
+sub get_vnets {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::VNet->new(rpc => $self);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # all VNets
+                               [ int => -1 ], # range start
+                               [ int => -1 ], # range end
+                               );
+}
+
 sub get_images {
    my ($self, $nameregex) = @_;
 
@@ -186,6 +198,16 @@ sub create_template {
    my ($self, $txt) = @_;
 
    my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
+   $new_tmpl->create($txt);
+   
+   return $new_tmpl;
+}
+
+
+sub create_vnet {
+   my ($self, $txt) = @_;
+
+   my $new_tmpl = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
    $new_tmpl->create($txt);
    
    return $new_tmpl;
