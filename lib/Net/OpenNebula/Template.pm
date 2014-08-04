@@ -24,6 +24,7 @@ sub name {
    return $self->{extended_data}->{NAME}->[0];
 }
 
+
 sub get_template_ref {
    my ($self) = @_;
    $self->_get_info();
@@ -41,16 +42,9 @@ sub get_data {
 
 sub create {
    my ($self, $tpl_txt) = @_;
-   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ]);
-   $self->{data} =  $self->_get_info(id => $id); 
-   return $id;
+   return $self->_allocate([ string => $tpl_txt ]);
 }
 
-
-sub delete {
-    my ($self) = @_;
-    return $self->_onerpc_id("delete");
-}
 
 sub instantiate {
     my ($self, %options) = @_;
