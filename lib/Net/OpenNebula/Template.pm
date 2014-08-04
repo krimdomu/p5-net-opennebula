@@ -37,4 +37,32 @@ sub get_data {
    return $self->{extended_data};
 }
 
+
+sub create {
+   my ($self, $tpl_txt) = @_;
+   my $id = $self->_onerpc("allocate", [ string => $tpl_txt ]);
+   $self->{data} =  $self->_get_info(id => $id); 
+   return $id;
+}
+
+
+sub delete {
+    my ($self) = @_;
+    return $self->_onerpc_id("delete");
+}
+
+sub instantiate {
+    my ($self, %options) = @_;
+
+    my @args = ([ int => $self->id ]);
+
+    push(@args, [ string => $options{name} || "" ] );
+    push(@args, [ boolean => $options{onhold} || 0 ] );
+    push(@args, [ string => $options{extra} || "" ] );
+
+    my $vmid = $self->_onerpc("instantiate", @args);
+    
+    return $vmid;
+}
+
 1;

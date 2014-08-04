@@ -68,15 +68,21 @@ sub get_clusters {
    return @ret;
 }
 
+# When C<nameregex> is defined, only hosts with name matching 
+# the regular expression are returned (if any).
+# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
 sub get_hosts {
-   my ($self) = @_;
+   my ($self, $nameregex) = @_;
 
    my @ret = ();
 
    my $data = $self->_rpc("one.hostpool.info");
 
    for my $host (@{ $data->{HOST} }) {
-      push(@ret, Net::OpenNebula::Host->new(rpc => $self, data => $host));
+      my $inst = Net::OpenNebula::Host->new(rpc => $self, data => $host); 
+      if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) { 
+         push(@ret, $inst);
+      }   
    }
 
    return @ret;
@@ -93,8 +99,11 @@ sub get_host {
    return Net::OpenNebula::Host->new(rpc => $self, data => $data, extended_data => $data);
 }
 
+# When C<nameregex> is defined, only VMs with name matching 
+# the regular expression are returned (if any).
+# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
 sub get_vms {
-   my ($self) = @_;
+   my ($self, $nameregex) = @_;
 
    my $data = $self->_rpc("one.vmpool.info", 
                            [ int => -2 ], # always get all resources
@@ -106,7 +115,10 @@ sub get_vms {
    my @ret = ();
 
    for my $vm (@{ $data->{VM} }) {
-      push(@ret, Net::OpenNebula::VM->new(rpc => $self, data => $vm));
+      my $inst = Net::OpenNebula::VM->new(rpc => $self, data => $vm); 
+      if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) { 
+         push(@ret, $inst);
+      }   
    }
 
    return @ret;
@@ -132,8 +144,11 @@ sub get_vm {
 
 }
 
+# When C<nameregex> is defined, only templates with name matching 
+# the regular expression are returned (if any).
+# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
 sub get_templates {
-   my ($self) = @_;
+   my ($self, $nameregex) = @_;
 
    my $data = $self->_rpc("one.templatepool.info",
                            [ int => -2 ], # all templates
@@ -144,7 +159,10 @@ sub get_templates {
    my @ret = ();
 
    for my $tpl (@{ $data->{VMTEMPLATE} } ) {
-      push(@ret, Net::OpenNebula::Template->new(rpc => $self, data => $tpl));
+      my $inst = Net::OpenNebula::Template->new(rpc => $self, data => $tpl); 
+      if (! defined($nameregex) || ($inst->name && $inst->name =~ m/$nameregex/) ) { 
+         push(@ret, $inst);
+      }   
    }
 
    return @ret;
@@ -187,6 +205,17 @@ sub create_host {
 
    return $self->get_host($data->[1]);
 }
+
+
+sub create_template {
+   my ($self, $txt) = @_;
+
+   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
+   $new_tmpl->create($txt);
+   
+   return $new_tmpl;
+}
+
 
 sub _rpc {
    my ($self, $meth, @params) = @_;                                                                                

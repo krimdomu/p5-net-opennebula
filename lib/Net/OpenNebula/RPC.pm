@@ -25,6 +25,13 @@ sub _onerpc {
     return $self->{rpc}->_rpc("one.$self->{ONERPC}.$method", @args);
 }
 
+sub _onerpc_id {
+    my ($self, $method) = @_;
+    return $self->_onerpc($method,
+                            [ int => $self->id ],
+                         );
+};
+
 sub _onerpc_simple {
     my ($self, $method, $arg) = @_;
     return $self->_onerpc($method,
@@ -36,8 +43,11 @@ sub _onerpc_simple {
 sub _get_info {
    my ($self, %option) = @_;
 
+   my $id = $self->id;
+   $id = $option{id} if (exists $option{id});  
+
    if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
-      $self->{extended_data} = $self->_onerpc("info", [ int => $self->id ]);
+      $self->{extended_data} = $self->_onerpc("info", [ int => $id ]);
    }
 }
 
