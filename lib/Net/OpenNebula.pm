@@ -44,7 +44,7 @@ use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
 use Net::OpenNebula::VM;
 
-our $VERSION = "0.0.1";
+our $VERSION = "0.0.99.1";
 
 sub new {
    my $that = shift;
