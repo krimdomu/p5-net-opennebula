@@ -6,6 +6,8 @@ use warnings;
 use Data::Dumper;
 
 use constant ONERPC => 'rpc';
+use constant ONEPOOLKEY => undef;
+
 
 sub new {
    my $that = shift;
@@ -60,5 +62,30 @@ sub dump {
     my $self = shift;
     return Dumper($self);
 }
+
+# When C<nameregex> is defined, only instances with name matching 
+# the regular expression are returned (if any).
+# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
+sub _get_instances {
+    my ($self, $nameregex, @args) = @_;
+
+    my $class = ref $self;
+    my $pool = $class->ONERPC . "pool";
+    my $key = $class->ONEPOOLKEY || uc($class->ONERPC);
+
+    my @ret = ();
+
+    my $reply = $self->{rpc}->_rpc("one.$pool.info", @args);
+   
+    for my $data (@{ $reply->{$key} }) {
+        my $inst = $self->new(rpc => $self->{rpc}, data => $data); 
+        if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) { 
+            push(@ret, $inst);
+        }   
+    }
+    
+    return @ret;
+}
+
 
 1;

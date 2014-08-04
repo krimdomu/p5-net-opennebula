@@ -37,10 +37,11 @@ use RPC::XML::Client;
 
 use Data::Dumper;
 
-use Net::OpenNebula::Host;
 use Net::OpenNebula::Cluster;
-use Net::OpenNebula::VM;
+use Net::OpenNebula::Datastore;
+use Net::OpenNebula::Host;
 use Net::OpenNebula::Template;
+use Net::OpenNebula::VM;
 
 our $VERSION = "0.0.1";
 
@@ -55,37 +56,24 @@ sub new {
 }
 
 sub get_clusters {
-   my ($self) = @_;
+   my ($self, $nameregex) = @_;
 
-   my @ret = ();
-
-   my $data = $self->_rpc("one.clusterpool.info");
-
-   for my $cluster (@{ $data->{CLUSTER} }) {
-      push(@ret, Net::OpenNebula::Cluster->new(rpc => $self, data => $cluster));
-   }
-
-   return @ret;
+   my $new = Net::OpenNebula::Cluster->new(rpc => $self);
+   return $new->_get_instances($nameregex);
 }
 
-# When C<nameregex> is defined, only hosts with name matching 
-# the regular expression are returned (if any).
-# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
+sub get_datastores {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::Datastore->new(rpc => $self);
+   return $new->_get_instances($nameregex);
+}
+
 sub get_hosts {
    my ($self, $nameregex) = @_;
 
-   my @ret = ();
-
-   my $data = $self->_rpc("one.hostpool.info");
-
-   for my $host (@{ $data->{HOST} }) {
-      my $inst = Net::OpenNebula::Host->new(rpc => $self, data => $host); 
-      if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) { 
-         push(@ret, $inst);
-      }   
-   }
-
-   return @ret;
+   my $new = Net::OpenNebula::Host->new(rpc => $self);
+   return $new->_get_instances($nameregex);
 }
 
 sub get_host {
@@ -99,29 +87,16 @@ sub get_host {
    return Net::OpenNebula::Host->new(rpc => $self, data => $data, extended_data => $data);
 }
 
-# When C<nameregex> is defined, only VMs with name matching 
-# the regular expression are returned (if any).
-# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
 sub get_vms {
    my ($self, $nameregex) = @_;
 
-   my $data = $self->_rpc("one.vmpool.info", 
-                           [ int => -2 ], # always get all resources
-                           [ int => -1 ], # range from (begin)
-                           [ int => -1 ], # range to (end)
-                           [ int => -1 ], # all states, except DONE
-                         ); 
-
-   my @ret = ();
-
-   for my $vm (@{ $data->{VM} }) {
-      my $inst = Net::OpenNebula::VM->new(rpc => $self, data => $vm); 
-      if (! defined($nameregex) || ($inst->name && $inst->name =~ $nameregex) ) { 
-         push(@ret, $inst);
-      }   
-   }
-
-   return @ret;
+   my $new = Net::OpenNebula::VM->new(rpc => $self);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # always get all resources
+                               [ int => -1 ], # range from (begin)
+                               [ int => -1 ], # range to (end)
+                               [ int => -1 ], # all states, except DONE
+                               ); 
 }
 
 sub get_vm {
@@ -144,28 +119,16 @@ sub get_vm {
 
 }
 
-# When C<nameregex> is defined, only templates with name matching 
-# the regular expression are returned (if any).
-# C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
+
 sub get_templates {
    my ($self, $nameregex) = @_;
 
-   my $data = $self->_rpc("one.templatepool.info",
-                           [ int => -2 ], # all templates
-                           [ int => -1 ], # range start
-                           [ int => -1 ], # range end
-                         );
-
-   my @ret = ();
-
-   for my $tpl (@{ $data->{VMTEMPLATE} } ) {
-      my $inst = Net::OpenNebula::Template->new(rpc => $self, data => $tpl); 
-      if (! defined($nameregex) || ($inst->name && $inst->name =~ m/$nameregex/) ) { 
-         push(@ret, $inst);
-      }   
-   }
-
-   return @ret;
+   my $new = Net::OpenNebula::Template->new(rpc => $self);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # all templates
+                               [ int => -1 ], # range start
+                               [ int => -1 ], # range end
+                               );
 }
 
 sub create_vm {
