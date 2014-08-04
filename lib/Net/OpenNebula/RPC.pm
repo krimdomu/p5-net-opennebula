@@ -87,5 +87,28 @@ sub _get_instances {
     return @ret;
 }
 
+# state: the state (in text) to wait for
+# opts
+#    sleep: sleep per interval
+#    max_iter: maximum iterations (if 0, no sleep)
+sub wait_for_state {
+    my ($self, $state, %opts) = @_;
+    
+    my $sleep = 5; # in seconds
+    my $max_iter = 200; # approx 15 minutes with default sleep 
+    $sleep = $opts{sleep} if defined($opts{sleep});
+    $max_iter = $opts{max_iter} if defined($opts{max_iter});
+
+    my $currentstate = $state eq $self->state;
+    my $ind = 1; # first state fetched, no sleep involved
+    while ($ind < $max_iter && ! $currentstate) {
+        sleep($sleep);
+        $currentstate = $state eq $self->state;
+        $ind +=1;
+    }
+    
+    return $currentstate;
+   
+}
 
 1;

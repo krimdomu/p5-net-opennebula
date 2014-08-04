@@ -40,6 +40,7 @@ use Data::Dumper;
 use Net::OpenNebula::Cluster;
 use Net::OpenNebula::Datastore;
 use Net::OpenNebula::Host;
+use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
 use Net::OpenNebula::VM;
 
@@ -131,6 +132,17 @@ sub get_templates {
                                );
 }
 
+sub get_images {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::Image->new(rpc => $self);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # all templates
+                               [ int => -1 ], # range start
+                               [ int => -1 ], # range end
+                               );
+}
+
 sub create_vm {
    my ($self, %option) = @_;
 
@@ -175,6 +187,25 @@ sub create_template {
 
    my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
    $new_tmpl->create($txt);
+   
+   return $new_tmpl;
+}
+
+
+sub create_image {
+   my ($self, $txt, $datastore) = @_;
+
+   my $datastoreid; 
+   if($datastore =~ m/^\d+$/) {
+      $datastoreid = $datastore;
+   }
+   else {
+      my @datastores = $self->get_datastores(qr{^$datastore$});
+      $datastoreid = $datastores[0]->id if (@datastores); # take the first one
+   }
+
+   my $new_tmpl = Net::OpenNebula::Image->new(rpc => $self, data => undef);
+   $new_tmpl->create($txt, $datastoreid);
    
    return $new_tmpl;
 }
