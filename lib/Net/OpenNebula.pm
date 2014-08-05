@@ -31,9 +31,8 @@ package Net::OpenNebula;
 use strict;
 use warnings;
 
-use XML::Simple;
-use RPC::XML;
-use RPC::XML::Client;
+use Net::OpenNebula::RPCClient;
+push our @ISA , qw(Net::OpenNebula::RPCClient);
 
 use Data::Dumper;
 
@@ -43,18 +42,9 @@ use Net::OpenNebula::Host;
 use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
 use Net::OpenNebula::VM;
+use Net::OpenNebula::VNet;
 
 our $VERSION = "0.0.99.1";
-
-sub new {
-   my $that = shift;
-   my $proto = ref($that) || $that;
-   my $self = { @_ };
-
-   bless($self, $proto);
-
-   return $self;
-}
 
 sub get_clusters {
    my ($self, $nameregex) = @_;
@@ -132,6 +122,17 @@ sub get_templates {
                                );
 }
 
+sub get_vnets {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::VNet->new(rpc => $self);
+   return $new->_get_instances($nameregex,
+                               [ int => -2 ], # all VNets
+                               [ int => -1 ], # range start
+                               [ int => -1 ], # range end
+                               );
+}
+
 sub get_images {
    my ($self, $nameregex) = @_;
 
@@ -192,6 +193,16 @@ sub create_template {
 }
 
 
+sub create_vnet {
+   my ($self, $txt) = @_;
+
+   my $new_tmpl = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
+   $new_tmpl->create($txt);
+   
+   return $new_tmpl;
+}
+
+
 sub create_image {
    my ($self, $txt, $datastore) = @_;
 
@@ -208,36 +219,6 @@ sub create_image {
    $new_tmpl->create($txt, $datastoreid);
    
    return $new_tmpl;
-}
-
-
-sub _rpc {
-   my ($self, $meth, @params) = @_;                                                                                
-
-   my @params_o = (RPC::XML::string->new($self->{user} . ":" . $self->{password}));
-   for my $p (@params) {
-      my $klass = "RPC::XML::" . $p->[0];
-      push(@params_o, $klass->new($p->[1]));
-   }   
-
-   my $req = RPC::XML::request->new($meth, @params_o);
-   my $cli = RPC::XML::Client->new($self->{url});
-   my $resp = $cli->send_request($req);
-   my $ret = $resp->value;
-
-   if($ret->[0] == 1) {
-      if($ret->[1] =~ m/^\d+$/) {
-         return $ret->[1];
-      }
-      else {
-         return XMLin($ret->[1], ForceArray => 1);
-      }
-   }   
-
-   else {
-      die("error sending request.");
-   }   
-
 }
 
 1;

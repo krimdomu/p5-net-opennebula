@@ -42,6 +42,11 @@ sub _onerpc_simple {
                          );
 };
 
+
+# return info call
+# opts
+#   clearcache: if set to 1, clears the cache and queries again
+#   id: get info for other id (if missing, use $self->id) 
 sub _get_info {
    my ($self, %option) = @_;
 
@@ -61,6 +66,18 @@ sub id {
 sub dump {
     my $self = shift;
     return Dumper($self);
+}
+
+sub _allocate {
+   my ($self, @args) = @_;
+   my $id = $self->_onerpc("allocate", @args);
+   $self->{data} =  $self->_get_info(id => $id); 
+   return $id;
+}
+
+sub delete {
+    my ($self) = @_;
+    return $self->_onerpc_id("delete");
 }
 
 # When C<nameregex> is defined, only instances with name matching 
@@ -110,5 +127,15 @@ sub wait_for_state {
     return $currentstate;
    
 }
+
+# add logging shortcuts
+no strict 'refs';
+foreach my $i (qw(error warn info verbose debug)) {
+    *{$i} = sub {
+        my ($self, @args) = @_;
+        return $self->{rpc}->{log}->$i(@args);
+    }
+}
+use strict 'refs';
 
 1;
