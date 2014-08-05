@@ -128,4 +128,14 @@ sub wait_for_state {
    
 }
 
+# add logging shortcuts
+no strict 'refs';
+foreach my $i (qw(error warn info verbose debug)) {
+    *{$i} = sub {
+        my ($self, @args) = @_;
+        return $self->{rpc}->{log}->$i(@args);
+    }
+}
+use strict 'refs';
+
 1;
