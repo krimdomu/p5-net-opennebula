@@ -16,6 +16,7 @@ use Net::OpenNebula::RPC;
 push our @ISA , qw(Net::OpenNebula::RPC);
 
 use constant ONERPC => 'vn';
+use constant ONEPOOLKEY => 'VNET';
 
 sub create {
    my ($self, $tpl_txt, %option) = @_;
@@ -28,8 +29,18 @@ sub _leases {
     my ($self, $lease_txt, $mode) = @_;
     $mode = "add" if (! ($mode && $mode =~ m/^(add|rm)$/));
     
-    return $self->_onerpc("${mode}leases", [ string => $lease_txt ]);
+    return $self->_onerpc("${mode}leases", 
+                          [ int => $self->id ], 
+                          [ string => $lease_txt ]
+                          );
     
+}
+
+sub name {
+   my ($self) = @_;
+   $self->_get_info();
+
+   return $self->{extended_data}->{NAME}->[0];
 }
 
 sub addleases {
