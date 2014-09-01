@@ -80,6 +80,23 @@ sub delete {
     return $self->_onerpc_id("delete");
 }
 
+sub update {
+    my ($self, $tpl, $merge) = @_;
+
+    # reset $merge to integer value; undef implies merge = 0
+    if ($merge) {
+        $merge = 1;
+    } else {
+        $merge = 0;
+    }
+    return $self->_onerpc("update",
+                          [ int => $self->id ],
+                          [ string => $tpl ],
+                          [ int => $merge ]
+                          );
+}
+
+
 # When C<nameregex> is defined, only instances with name matching 
 # the regular expression are returned (if any).
 # C<nameregex> is a compiled regular expression (e.g. qr{^somename$}).
