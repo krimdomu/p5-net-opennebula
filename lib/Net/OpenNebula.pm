@@ -71,7 +71,14 @@ sub get_host {
    my ($self, $id) = @_;
 
    if(! defined $id) {
-      die("You have to define the ID => Usage: \$obj->get_host(\$host_id)");
+       my $msg = "You have to define the ID => Usage: \$obj->get_host(\$host_id)";
+       
+       $self->error($msg);
+       if( $self->{fail_on_rpc_fail}) {
+           die($msg);
+       } else {
+           return undef;
+       }
    }
 
    my $data = $self->_rpc("one.host.info", [ int => $id ]);
@@ -94,9 +101,15 @@ sub get_vm {
    my ($self, $id) = @_;
 
    if(! defined $id) {
-      die("You have to define the ID => Usage: \$obj->get_vm(\$vm_id)");
+       my $msg = "You have to define the ID => Usage: \$obj->\$obj->get_vm(\$vm_id)";
+       
+       $self->error($msg);
+       if( $self->{fail_on_rpc_fail}) {
+           die($msg);
+       } else {
+           return undef;
+       }
    }
-
 
    if($id =~ m/^\d+$/) {
       my $data = $self->_rpc("one.vm.info", [ int => $id ]);
@@ -176,10 +189,21 @@ sub create_host {
                               [ string => $option{vnm_mad} ],
                               [ int => (exists $option{cluster} ? $option{cluster} : -1) ] );
    if(ref($data) ne "ARRAY") {
-      return;
+       $self->error("Create host failed (data ".Dumper(\$data).")");
+       return;
    }
 
    return $self->get_host($data->[1]);
+}
+
+
+sub create_datastore {
+   my ($self, $txt) = @_;
+
+   my $new_datastore = Net::OpenNebula::Datastore->new(rpc => $self, data => undef);
+   $new_datastore->create($txt);
+   
+   return $new_datastore;
 }
 
 
