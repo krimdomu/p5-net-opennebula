@@ -24,5 +24,10 @@ sub name {
    return $self->{data}->{NAME}->[0] || $self->{data}->{TEMPLATE}->[0]->{NAME}->[0];
 }
 
+sub create {
+   my ($self, $tpl_txt) = @_;
+   return $self->_allocate([ string => $tpl_txt ]);
+}
+
 
 1;
