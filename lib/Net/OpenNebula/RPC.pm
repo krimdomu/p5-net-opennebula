@@ -80,12 +80,15 @@ sub dump {
 sub _allocate {
    my ($self, @args) = @_;
    my $id = $self->_onerpc("allocate", @args);
+   $self->debug(1, "$self->{ONERPC} allocate returned id $id");
    $self->{data} =  $self->_get_info(id => $id); 
+   $self->debug(3, "$self->{ONERPC} allocate updated data for id $id");
    return $id;
 }
 
 sub delete {
     my ($self) = @_;
+    $self->debug(1, "$self->{ONERPC} delete self->id ".$self->id);
     return $self->_onerpc_id("delete");
 }
 
