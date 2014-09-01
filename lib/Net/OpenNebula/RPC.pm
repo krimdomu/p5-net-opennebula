@@ -24,7 +24,16 @@ sub new {
 sub _onerpc {
     my ($self, $method, @args) = @_;
 
-    return $self->{rpc}->_rpc("one.$self->{ONERPC}.$method", @args);
+	my $onemethod = "one.$self->{ONERPC}.$method";
+		
+	my @txt;
+	foreach my $arg (@args) {
+		push(@txt, @$arg);
+	};
+	my $args_txt = join("[, ]", @txt);
+	$self->debug(4, "_onerpc method $onemethod args [$args_txt]");
+
+    return $self->{rpc}->_rpc($onemethod, @args);
 }
 
 sub _onerpc_id {
