@@ -41,6 +41,7 @@ use Net::OpenNebula::Datastore;
 use Net::OpenNebula::Host;
 use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
+use Net::OpenNebula::User;
 use Net::OpenNebula::VM;
 use Net::OpenNebula::VNet;
 
@@ -57,6 +58,13 @@ sub get_datastores {
    my ($self, $nameregex) = @_;
 
    my $new = Net::OpenNebula::Datastore->new(rpc => $self);
+   return $new->_get_instances($nameregex);
+}
+
+sub get_users {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::User->new(rpc => $self);
    return $new->_get_instances($nameregex);
 }
 
@@ -200,30 +208,39 @@ sub create_host {
 sub create_datastore {
    my ($self, $txt) = @_;
 
-   my $new_datastore = Net::OpenNebula::Datastore->new(rpc => $self, data => undef);
-   $new_datastore->create($txt);
+   my $new = Net::OpenNebula::Datastore->new(rpc => $self, data => undef);
+   $new->create($txt);
    
-   return $new_datastore;
+   return $new;
+}
+
+sub create_user {
+   my ($self, $name, $password, $driver) = @_;
+
+   my $new = Net::OpenNebula::User->new(rpc => $self, data => undef);
+   $new->create($name, $password, $driver);
+   
+   return $new;
 }
 
 
 sub create_template {
    my ($self, $txt) = @_;
 
-   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt);
+   my $new = Net::OpenNebula::Template->new(rpc => $self, data => undef);
+   $new->create($txt);
    
-   return $new_tmpl;
+   return $new;
 }
 
 
 sub create_vnet {
    my ($self, $txt) = @_;
 
-   my $new_tmpl = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt);
+   my $new = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
+   $new->create($txt);
    
-   return $new_tmpl;
+   return $new;
 }
 
 
@@ -239,10 +256,10 @@ sub create_image {
       $datastoreid = $datastores[0]->id if (@datastores); # take the first one
    }
 
-   my $new_tmpl = Net::OpenNebula::Image->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt, $datastoreid);
+   my $new = Net::OpenNebula::Image->new(rpc => $self, data => undef);
+   $new->create($txt, $datastoreid);
    
-   return $new_tmpl;
+   return $new;
 }
 
 1;
