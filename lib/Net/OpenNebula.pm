@@ -45,7 +45,7 @@ use Net::OpenNebula::User;
 use Net::OpenNebula::VM;
 use Net::OpenNebula::VNet;
 
-our $VERSION = "0.0.99.1";
+our $VERSION = "0.0.99.2";
 
 sub get_clusters {
    my ($self, $nameregex) = @_;
