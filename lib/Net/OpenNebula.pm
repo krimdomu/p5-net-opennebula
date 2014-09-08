@@ -166,42 +166,49 @@ sub get_images {
 }
 
 sub create_vm {
-   my ($self, %option) = @_;
+    my ($self, %option) = @_;
 
-   my $template;
+    my $template;
 
-   if($option{template} =~ m/^\d+$/) {
-      ($template) = grep { $_->id == $option{template} } $self->get_templates;   
-   }
-   else {
-      ($template) = grep { $_->name eq $option{template} } $self->get_templates;   
-   }
+    if($option{template} =~ m/^\d+$/) {
+        ($template) = grep { $_->id == $option{template} } $self->get_templates;   
+    }
+    else {
+        ($template) = grep { $_->name eq $option{template} } $self->get_templates;   
+    }
 
-   my $hash_ref = $template->get_template_ref;
-   $hash_ref->{TEMPLATE}->[0]->{NAME}->[0] = $option{name};
+    my $hash_ref = $template->get_template_ref;
+    $hash_ref->{TEMPLATE}->[0]->{NAME}->[0] = $option{name};
 
-   my $s = XMLout($hash_ref, RootName => undef, NoIndent => 1 );
+    my $s = XMLout($hash_ref, RootName => undef, NoIndent => 1 );
 
-   my $res = $self->_rpc("one.vm.allocate", [ string => $s ]);
+    my $id = $self->_rpc("one.vm.allocate", [ string => $s ]);
 
-   return $self->get_vm($res);
+    if(! defined($id)) {
+        $self->error("Create vm failed");
+        return;
+    }    
+
+    return $self->get_vm($id);
 }
 
 sub create_host {
-   my ($self, %option) = @_;
+    my ($self, %option) = @_;
 
-   my $data = $self->_rpc("one.host.allocate",
+    my $id = $self->_rpc("one.host.allocate",
                               [ string => $option{name} ],
                               [ string => $option{im_mad} ],
                               [ string => $option{vmm_mad} ],
                               [ string => $option{vnm_mad} ],
                               [ int => (exists $option{cluster} ? $option{cluster} : -1) ] );
-   if(ref($data) ne "ARRAY") {
-       $self->error("Create host failed (data ".Dumper(\$data).")");
-       return;
-   }
 
-   return $self->get_host($data->[1]);
+
+    if(! defined($id)) {
+        $self->error("Create host failed");
+        return;
+    }    
+
+    return $self->get_host($id);
 }
 
 
