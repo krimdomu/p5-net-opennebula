@@ -59,7 +59,7 @@ sub new {
 }
 
 sub _rpc_args_to_txt {
-    my ($self, @args);
+    my ($self, @args) = @_;
 
     my @txt;
     foreach my $arg (@args) {
@@ -67,14 +67,14 @@ sub _rpc_args_to_txt {
     };
     my $args_txt = join("], [", @txt);
 
-    return $args_txt;
+    return "[$args_txt]";
 }
 
 sub _rpc {
     my ($self, $meth, @params) = @_;                                                                                
     
     my $args_txt = $self->_rpc_args_to_txt(@params);
-    $self->debug(4, "_rpc called with method $meth args [$args_txt]");
+    $self->debug(4, "_rpc called with method $meth args $args_txt");
 
     my @params_o = (RPC::XML::string->new($self->{user} . ":" . $self->{password}));
     for my $p (@params) {
@@ -99,7 +99,7 @@ sub _rpc {
     my $ret = $resp->value;
     
     if(ref($ret) ne "ARRAY") {
-        $self->error("_rpc failed to make request faultCode $ret->{faultCode} faultString $ret->{faultString} method $meth args [$args_txt]");
+        $self->error("_rpc failed to make request faultCode $ret->{faultCode} faultString $ret->{faultString} method $meth args $args_txt");
         return;
     } 
     
