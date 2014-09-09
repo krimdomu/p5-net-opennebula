@@ -73,8 +73,9 @@ sub _rpc_args_to_txt {
 sub _rpc {
     my ($self, $meth, @params) = @_;                                                                                
     
-    my $args_txt = $self->_rpc_args_to_txt(@params);
-    $self->debug(4, "_rpc called with method $meth args $args_txt");
+    my $req_txt = "method $meth args ".$self->_rpc_args_to_txt(@params);
+    
+    $self->debug(4, "_rpc called with $req_txt");
 
     my @params_o = (RPC::XML::string->new($self->{user} . ":" . $self->{password}));
     for my $p (@params) {
@@ -99,7 +100,7 @@ sub _rpc {
     my $ret = $resp->value;
     
     if(ref($ret) ne "ARRAY") {
-        $self->error("_rpc failed to make request faultCode $ret->{faultCode} faultString $ret->{faultString} method $meth args $args_txt");
+        $self->error("_rpc failed to make request faultCode $ret->{faultCode} faultString $ret->{faultString} $req_txt");
         return;
     } 
     
@@ -114,7 +115,7 @@ sub _rpc {
     }   
 
     else {
-        $self->error("Error sending request: $ret->[1] (code $ret->[2])");
+        $self->error("_rpc Error sending request $req_txt: $ret->[1] (code $ret->[2])");
         if( $self->{fail_on_rpc_fail}) {
             die("error sending request.");
         } else {

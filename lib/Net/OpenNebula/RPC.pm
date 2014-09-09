@@ -97,11 +97,11 @@ sub dump {
 
 sub _allocate {
     my ($self, @args) = @_;
+
     my $id = $self->_onerpc("allocate", @args);
 
-    my $args_txt = $self->{rpc}->_rpc_args_to_txt(@args);
-    
     if (! defined($id)) {
+        my $args_txt = $self->{rpc}->_rpc_args_to_txt(@args);
         $self->error("$self->{ONERPC}: _allocate failed, no id returned (arguments $args_txt).");
         return;        
     }
@@ -124,7 +124,7 @@ sub delete {
 
     $self->has_id("delete") || return;
 
-    $self->debug(1, "$self->{ONERPC} delete self->id $self->id");
+    $self->debug(1, "$self->{ONERPC} delete id ".$self->id);
     return $self->_onerpc_id("delete");
 }
 
