@@ -25,8 +25,10 @@ sub name {
 }
 
 sub create {
-   my ($self, $tpl_txt) = @_;
-   return $self->_allocate([ string => $tpl_txt ]);
+   my ($self, $tpl_txt, %option) = @_;
+   return $self->_allocate([ string => $tpl_txt ],
+                           [ int => (exists $option{cluster} ? $option{cluster} : -1) ],
+                           );
 }
 
 
