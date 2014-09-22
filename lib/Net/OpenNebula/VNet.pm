@@ -53,15 +53,13 @@ sub rmleases {
     return $self->_leases($lease_txt, "rm");
 }
 
-# Return the number of leases 
 sub used {
    my ($self) = @_;
    $self->_get_info();
    if ($self->{extended_data}->{TOTAL_LEASES}->[0]) {
        return 1;
-   } else {
-       return;
-   }
+   } 
+   return;
 };
 
 1;

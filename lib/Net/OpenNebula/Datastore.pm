@@ -36,9 +36,8 @@ sub used {
    $self->_get_info();
    if ($self->{extended_data}->{IMAGES}->[0]->{ID}->[0]) {
        return 1;
-   } else {
-       return;
-   }
+   } 
+   return;
 };
 
 1;
