@@ -37,7 +37,6 @@ sub used {
    if ($self->{extended_data}->{IMAGES}->[0]->{ID}->[0]) {
        return 1;
    } 
-   return;
 };
 
 1;

@@ -59,7 +59,6 @@ sub used {
    if ($self->{extended_data}->{TOTAL_LEASES}->[0]) {
        return 1;
    } 
-   return;
 };
 
 1;

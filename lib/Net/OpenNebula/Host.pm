@@ -61,7 +61,6 @@ sub used {
    if ($self->{extended_data}->{HOST_SHARE}->[0]->{RUNNING_VMS}->[0]) {
        return 1;
    } 
-   return;
 };
 
 1;
