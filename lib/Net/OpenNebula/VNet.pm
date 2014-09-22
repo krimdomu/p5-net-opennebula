@@ -57,7 +57,11 @@ sub rmleases {
 sub used {
    my ($self) = @_;
    $self->_get_info();
-   return $self->{extended_data}->{TOTAL_LEASES}->[0];
+   if ($self->{extended_data}->{TOTAL_LEASES}->[0]) {
+       return 1;
+   } else {
+       return;
+   }
 };
 
 1;
