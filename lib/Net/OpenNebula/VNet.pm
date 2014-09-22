@@ -53,10 +53,10 @@ sub rmleases {
     return $self->_leases($lease_txt, "rm");
 }
 
-# Return the state as string
+# Return the number of leases 
 sub used {
    my ($self) = @_;
-   $self->_get_info(clearcache => 1);
+   $self->_get_info();
    return $self->{extended_data}->{TOTAL_LEASES}->[0];
 };
 

@@ -57,7 +57,7 @@ sub vms {
 
 sub used {
    my ($self) = @_;
-   $self->_get_info(clearcache => 1);
+   $self->_get_info();
    return $self->{extended_data}->{HOST_SHARE}->[0]->{RUNNING_VMS}->[0];
 };
 
