@@ -31,5 +31,10 @@ sub create {
                            );
 }
 
+sub used {
+   my ($self) = @_;
+   $self->_get_info(clearcache => 1);
+   return $self->{extended_data}->{IMAGES}->[0]->{ID}->[0];
+};
 
 1;
