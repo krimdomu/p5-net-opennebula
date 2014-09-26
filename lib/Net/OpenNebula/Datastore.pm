@@ -31,5 +31,12 @@ sub create {
                            );
 }
 
+sub used {
+   my ($self) = @_;
+   $self->_get_info();
+   if ($self->{extended_data}->{IMAGES}->[0]->{ID}->[0]) {
+       return 1;
+   } 
+};
 
 1;
