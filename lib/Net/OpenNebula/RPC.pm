@@ -24,21 +24,30 @@ sub new {
 sub _onerpc {
     my ($self, $method, @args) = @_;
 
-    return $self->{rpc}->_rpc("one.$self->{ONERPC}.$method", @args);
+	my $onemethod = "one.$self->{ONERPC}.$method";
+		
+    return $self->{rpc}->_rpc($onemethod, @args);
 }
 
 sub _onerpc_id {
     my ($self, $method) = @_;
+    
+    $self->has_id("_onerpc_id") || return;
+
     return $self->_onerpc($method,
                             [ int => $self->id ],
-                         );
+                          );
+    
 };
 
 sub _onerpc_simple {
     my ($self, $method, $arg) = @_;
+
+    $self->has_id("_onerpc_simple") || return;
+
     return $self->_onerpc($method,
-                            [ string => "$arg" ],
-                            [ int => $self->id ],
+                          [ string => "$arg" ],
+                          [ int => $self->id ],
                          );
 };
 
@@ -48,14 +57,19 @@ sub _onerpc_simple {
 #   clearcache: if set to 1, clears the cache and queries again
 #   id: get info for other id (if missing, use $self->id) 
 sub _get_info {
-   my ($self, %option) = @_;
+    my ($self, %option) = @_;
 
-   my $id = $self->id;
-   $id = $option{id} if (exists $option{id});  
+    my $id;
+    if (exists $option{id}) {
+        $id = $option{id} ;  
+    } else {
+        $self->has_id("_get_info") || return;
+        $id = $self->id;
+    }
 
-   if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
-      $self->{extended_data} = $self->_onerpc("info", [ int => $id ]);
-   }
+    if(! exists $self->{extended_data} || (exists $option{clearcache} && $option{clearcache} == 1)) {
+        $self->{extended_data} = $self->_onerpc("info", [ int => $id ]);
+    }
 }
 
 sub id {
@@ -63,22 +77,76 @@ sub id {
    return $self->{data}->{ID}->[0];
 }
 
+# just check if the id is valid or not (returned result to be used as boolean)
+sub has_id {
+    my ($self, $msg) = @_;
+    my $id = $self->id;
+
+    if (defined($id)) {
+        return 1;
+    } else {
+        $self->error("$self->{ONERPC}: no valid id ($msg)");
+        return 0;
+    }
+};
+
 sub dump {
     my $self = shift;
     return Dumper($self);
 }
 
 sub _allocate {
-   my ($self, @args) = @_;
-   my $id = $self->_onerpc("allocate", @args);
-   $self->{data} =  $self->_get_info(id => $id); 
-   return $id;
+    my ($self, @args) = @_;
+
+    my $id = $self->_onerpc("allocate", @args);
+
+    if (! defined($id)) {
+        my $args_txt = $self->{rpc}->_rpc_args_to_txt(@args);
+        $self->error("$self->{ONERPC}: _allocate failed, no id returned (arguments $args_txt).");
+        return;        
+    }
+
+    $self->debug(1, "$self->{ONERPC} allocate returned id $id");
+    
+    my $data = $self->_get_info(id => $id);
+    if (defined($data)) {
+        $self->{data} = $data;
+        $self->debug(3, "$self->{ONERPC} allocate updated data for id $id");
+        return $id;
+    } else {
+        $self->error("$self->{ONERPC} allocate updated data failed for id $id");
+        return;
+    }
 }
 
 sub delete {
     my ($self) = @_;
+
+    $self->has_id("delete") || return;
+
+    $self->debug(1, "$self->{ONERPC} delete id ".$self->id);
     return $self->_onerpc_id("delete");
 }
+
+sub update {
+    my ($self, $tpl, $merge) = @_;
+
+    # reset $merge to integer value; undef implies merge = 0
+    if ($merge) {
+        $merge = 1;
+    } else {
+        $merge = 0;
+    }
+
+    $self->has_id("update") || return;
+
+    return $self->_onerpc("update",
+                          [ int => $self->id ],
+                          [ string => $tpl ],
+                          [ int => $merge ]
+                          );
+}
+
 
 # When C<nameregex> is defined, only instances with name matching 
 # the regular expression are returned (if any).

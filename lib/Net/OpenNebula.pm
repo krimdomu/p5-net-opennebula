@@ -41,10 +41,11 @@ use Net::OpenNebula::Datastore;
 use Net::OpenNebula::Host;
 use Net::OpenNebula::Image;
 use Net::OpenNebula::Template;
+use Net::OpenNebula::User;
 use Net::OpenNebula::VM;
 use Net::OpenNebula::VNet;
 
-our $VERSION = "0.0.99.1";
+our $VERSION = "0.0.99.5";
 
 sub get_clusters {
    my ($self, $nameregex) = @_;
@@ -60,6 +61,13 @@ sub get_datastores {
    return $new->_get_instances($nameregex);
 }
 
+sub get_users {
+   my ($self, $nameregex) = @_;
+
+   my $new = Net::OpenNebula::User->new(rpc => $self);
+   return $new->_get_instances($nameregex);
+}
+
 sub get_hosts {
    my ($self, $nameregex) = @_;
 
@@ -71,7 +79,14 @@ sub get_host {
    my ($self, $id) = @_;
 
    if(! defined $id) {
-      die("You have to define the ID => Usage: \$obj->get_host(\$host_id)");
+       my $msg = "You have to define the ID => Usage: \$obj->get_host(\$host_id)";
+       
+       $self->error($msg);
+       if( $self->{fail_on_rpc_fail}) {
+           die($msg);
+       } else {
+           return undef;
+       }
    }
 
    my $data = $self->_rpc("one.host.info", [ int => $id ]);
@@ -94,9 +109,15 @@ sub get_vm {
    my ($self, $id) = @_;
 
    if(! defined $id) {
-      die("You have to define the ID => Usage: \$obj->get_vm(\$vm_id)");
+       my $msg = "You have to define the ID => Usage: \$obj->\$obj->get_vm(\$vm_id)";
+       
+       $self->error($msg);
+       if( $self->{fail_on_rpc_fail}) {
+           die($msg);
+       } else {
+           return undef;
+       }
    }
-
 
    if($id =~ m/^\d+$/) {
       my $data = $self->_rpc("one.vm.info", [ int => $id ]);
@@ -145,61 +166,88 @@ sub get_images {
 }
 
 sub create_vm {
-   my ($self, %option) = @_;
+    my ($self, %option) = @_;
 
-   my $template;
+    my $template;
 
-   if($option{template} =~ m/^\d+$/) {
-      ($template) = grep { $_->id == $option{template} } $self->get_templates;   
-   }
-   else {
-      ($template) = grep { $_->name eq $option{template} } $self->get_templates;   
-   }
+    if($option{template} =~ m/^\d+$/) {
+        ($template) = grep { $_->id == $option{template} } $self->get_templates;   
+    }
+    else {
+        ($template) = grep { $_->name eq $option{template} } $self->get_templates;   
+    }
 
-   my $hash_ref = $template->get_template_ref;
-   $hash_ref->{TEMPLATE}->[0]->{NAME}->[0] = $option{name};
+    my $hash_ref = $template->get_template_ref;
+    $hash_ref->{TEMPLATE}->[0]->{NAME}->[0] = $option{name};
 
-   my $s = XMLout($hash_ref, RootName => undef, NoIndent => 1 );
+    my $s = XMLout($hash_ref, RootName => undef, NoIndent => 1 );
 
-   my $res = $self->_rpc("one.vm.allocate", [ string => $s ]);
+    my $id = $self->_rpc("one.vm.allocate", [ string => $s ]);
 
-   return $self->get_vm($res);
+    if(! defined($id)) {
+        $self->error("Create vm failed");
+        return;
+    }    
+
+    return $self->get_vm($id);
 }
 
 sub create_host {
-   my ($self, %option) = @_;
+    my ($self, %option) = @_;
 
-   my $data = $self->_rpc("one.host.allocate",
+    my $id = $self->_rpc("one.host.allocate",
                               [ string => $option{name} ],
                               [ string => $option{im_mad} ],
                               [ string => $option{vmm_mad} ],
                               [ string => $option{vnm_mad} ],
                               [ int => (exists $option{cluster} ? $option{cluster} : -1) ] );
-   if(ref($data) ne "ARRAY") {
-      return;
-   }
 
-   return $self->get_host($data->[1]);
+
+    if(! defined($id)) {
+        $self->error("Create host failed");
+        return;
+    }    
+
+    return $self->get_host($id);
+}
+
+
+sub create_datastore {
+   my ($self, $txt) = @_;
+
+   my $new = Net::OpenNebula::Datastore->new(rpc => $self, data => undef);
+   $new->create($txt);
+   
+   return $new;
+}
+
+sub create_user {
+   my ($self, $name, $password, $driver) = @_;
+
+   my $new = Net::OpenNebula::User->new(rpc => $self, data => undef);
+   $new->create($name, $password, $driver);
+   
+   return $new;
 }
 
 
 sub create_template {
    my ($self, $txt) = @_;
 
-   my $new_tmpl = Net::OpenNebula::Template->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt);
+   my $new = Net::OpenNebula::Template->new(rpc => $self, data => undef);
+   $new->create($txt);
    
-   return $new_tmpl;
+   return $new;
 }
 
 
 sub create_vnet {
    my ($self, $txt) = @_;
 
-   my $new_tmpl = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt);
+   my $new = Net::OpenNebula::VNet->new(rpc => $self, data => undef);
+   $new->create($txt);
    
-   return $new_tmpl;
+   return $new;
 }
 
 
@@ -215,10 +263,10 @@ sub create_image {
       $datastoreid = $datastores[0]->id if (@datastores); # take the first one
    }
 
-   my $new_tmpl = Net::OpenNebula::Image->new(rpc => $self, data => undef);
-   $new_tmpl->create($txt, $datastoreid);
+   my $new = Net::OpenNebula::Image->new(rpc => $self, data => undef);
+   $new->create($txt, $datastoreid);
    
-   return $new_tmpl;
+   return $new;
 }
 
 1;

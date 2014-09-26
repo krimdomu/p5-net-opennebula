@@ -24,5 +24,19 @@ sub name {
    return $self->{data}->{NAME}->[0] || $self->{data}->{TEMPLATE}->[0]->{NAME}->[0];
 }
 
+sub create {
+   my ($self, $tpl_txt, %option) = @_;
+   return $self->_allocate([ string => $tpl_txt ],
+                           [ int => (exists $option{cluster} ? $option{cluster} : -1) ],
+                           );
+}
+
+sub used {
+   my ($self) = @_;
+   $self->_get_info();
+   if ($self->{extended_data}->{IMAGES}->[0]->{ID}->[0]) {
+       return 1;
+   } 
+};
 
 1;
